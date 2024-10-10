@@ -1,0 +1,2 @@
+# wastex
+my project
