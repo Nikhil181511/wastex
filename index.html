@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HERE Map with Markers</title>
+
+    <!-- HERE Maps JavaScript SDK -->
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        #mapContainer {
+            width: 100%;
+            height: 80vh; /* Make the map take 80% of the viewport height */
+        }
+
+        #submitButton {
+            position: relative; /* Positioning the button relative to the container */
+            margin: 10px auto; /* Center the button horizontally with a margin */
+            display: block; /* Display the button as a block element */
+            padding: 10px 20px; /* Add some padding for better appearance */
+            font-size: 16px; /* Increase font size */
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+            border: none; /* Remove borders */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer; /* Change cursor to pointer */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Add some shadow for depth */
+        }
+
+        #submitButton:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        #coordinates {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Map container -->
+    <div id="mapContainer"></div>
+
+    <!-- Submit button -->
+    <button id="submitButton">Submit Location</button>
+
+    <!-- Placeholder for the submitted coordinates -->
+    <div id="coordinates"></div>
+
+    <script>
+        // Initialize HERE Maps API
+        const platform = new H.service.Platform({
+            apikey: 'mdunLxyyXHsAMJJAkJ2U1t3n4crZ639MopzKwWi0Dk4', // Replace with your HERE Maps API key
+        });
+
+        // Obtain the default map layers
+        const defaultLayers = platform.createDefaultLayers();
+
+        // Initialize the map centered at Don Bosco College of Engineering
+        const map = new H.Map(
+            document.getElementById('mapContainer'),
+            defaultLayers.vector.normal.map,
+            {
+                center: { lat: 15.3402, lng: 73.9511 }, // Center at Don Bosco College of Engineering
+                zoom: 14,
+                pixelRatio: window.devicePixelRatio || 1,
+            }
+        );
+
+        // Enable map interaction
+        const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+        // Create the default UI
+        const ui = H.ui.UI.createDefault(map, defaultLayers);
+
+        // Variable to store the marker
+        let marker;
+
+        // Function to add a marker
+        const addMarker = (lat, lng) => {
+            // Remove the existing marker if it exists
+            if (marker) {
+                map.removeObject(marker);
+            }
+            
+            // Create and add the new marker
+            marker = new H.map.Marker({ lat, lng });
+            map.addObject(marker);
+            
+            // Log latitude and longitude
+            console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+        };
+
+        // Add click event listener to the map
+        map.addEventListener('tap', (evt) => {
+            const coord = map.screenToGeo(evt.currentPointer.viewportX, evt.currentPointer.viewportY);
+            addMarker(coord.lat, coord.lng); // Add marker at clicked location
+        });
+
+        // Add functionality to the submit button
+        document.getElementById('submitButton').addEventListener('click', () => {
+            if (marker) {
+                const { lat, lng } = marker.getGeometry();
+                
+                // Store coordinates in localStorage
+                localStorage.setItem('markerCoordinates', JSON.stringify({ lat, lng }));
+                
+                // Display coordinates on the same page
+                document.getElementById('coordinates').innerHTML = `
+                    <h1>Marker Coordinates</h1>
+                    <p>Latitude: ${lat}</p>
+                    <p>Longitude: ${lng}</p>
+                `;
+            } else {
+                alert('Please place a marker on the map before submitting.');
+            }
+        });
+
+        // Optionally, center the map to the college location on load
+        map.setCenter({ lat: 15.3402, lng: 73.9511 });
+    </script>
+</body>
+</html>
