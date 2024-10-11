@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HERE Map with Markers</title>
+    <title>HERE Map with Markers and Realistic Truck Animation</title>
 
     <!-- HERE Maps JavaScript SDK -->
     <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
@@ -25,25 +25,101 @@
         }
 
         #submitButton {
-            position: relative; /* Positioning the button relative to the container */
-            margin: 10px auto; /* Center the button horizontally with a margin */
-            display: block; /* Display the button as a block element */
-            padding: 10px 20px; /* Add some padding for better appearance */
-            font-size: 16px; /* Increase font size */
-            background-color: #4CAF50; /* Green background */
-            color: white; /* White text */
-            border: none; /* Remove borders */
-            border-radius: 5px; /* Rounded corners */
-            cursor: pointer; /* Change cursor to pointer */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Add some shadow for depth */
+            position: relative;
+            margin: 10px auto;
+            display: block;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         #submitButton:hover {
-            background-color: #45a049; /* Darker green on hover */
+            background-color: #45a049;
         }
 
         #coordinates {
             padding: 20px;
+        }
+
+        /* Truck and box styling */
+        #box {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #FF9800; /* Box color */
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+        }
+
+        #truck {
+            position: absolute;
+            width: 150px; /* Total truck width */
+            height: 60px; /* Total truck height */
+            bottom: 100px;
+            left: -200px; /* Start offscreen */
+            display: none;
+        }
+
+        /* Truck parts */
+        .truck-cab {
+            position: absolute;
+            width: 50px;
+            height: 60px;
+            background-color: #333;
+            top: 0;
+            left: 0;
+        }
+
+        .truck-container {
+            position: absolute;
+            width: 100px;
+            height: 40px;
+            background-color: #666;
+            top: 20px;
+            left: 50px;
+        }
+
+        /* Truck wheels */
+        .truck-wheel {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: black;
+            border-radius: 50%;
+            bottom: -10px;
+        }
+
+        .truck-wheel.front {
+            left: 10px;
+        }
+
+        .truck-wheel.back {
+            left: 110px;
+        }
+
+        /* Animations */
+        @keyframes moveTruck {
+            0% { left: -200px; }
+            50% { left: 50%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes moveBox {
+            0% { bottom: 100px; opacity: 1; }
+            50% { bottom: 130px; opacity: 0.5; }
+            100% { bottom: 150px; opacity: 0; }
+        }
+
+        /* Slow down the truck animation */
+        #truck {
+            animation-duration: 8s; /* Slower truck movement */
         }
     </style>
 </head>
@@ -56,6 +132,17 @@
 
     <!-- Placeholder for the submitted coordinates -->
     <div id="coordinates"></div>
+
+    <!-- Animation elements -->
+    <div id="box"></div>
+    <div id="truck">
+        <!-- Truck parts -->
+        <div class="truck-cab"></div>
+        <div class="truck-container"></div>
+        <!-- Truck wheels -->
+        <div class="truck-wheel front"></div>
+        <div class="truck-wheel back"></div>
+    </div>
 
     <script>
         // Initialize HERE Maps API
@@ -121,10 +208,34 @@
                     <p>Latitude: ${lat}</p>
                     <p>Longitude: ${lng}</p>
                 `;
+
+                // Trigger truck and box animation
+                animateTruckAndBox();
+
             } else {
                 alert('Please place a marker on the map before submitting.');
             }
         });
+
+        // Truck and box animation
+        function animateTruckAndBox() {
+            const box = document.getElementById('box');
+            const truck = document.getElementById('truck');
+
+            // Show box and truck
+            box.style.display = 'block';
+            truck.style.display = 'block';
+
+            // Start animations
+            box.style.animation = 'moveBox 8s ease forwards'; // Match box animation duration to truck
+            truck.style.animation = 'moveTruck 8s ease forwards'; // Slow down truck animation
+
+            // Hide elements after animation is complete
+            setTimeout(() => {
+                box.style.display = 'none';
+                truck.style.display = 'none';
+            }, 8000); // 8 seconds for the animations to complete
+        }
 
         // Optionally, center the map to the college location on load
         map.setCenter({ lat: 15.3402, lng: 73.9511 });
